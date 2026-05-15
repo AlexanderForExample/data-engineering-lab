@@ -1,0 +1,6 @@
+user_id,email,city,registered_at
+101,anna@example.com,Moscow,2026-01-01 10:00:00
+102,boris@example.com,SPb,2026-01-02 11:30:00
+103,irina@example.com,Kazan,2026-01-03 09:15:00
+104,oleg@example.com,Moscow,2026-01-04 16:45:00
+105,maria@example.com,Novosibirsk,2026-01-05 12:10:00
