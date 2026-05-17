@@ -1,7 +1,7 @@
 user_id,email,city,registered_at
-101,anna@example.com,Moscow,2026-01-01 10:00:00
-102,boris@example.com,SPb,2026-01-02 11:30:00
-103,irina@example.com,Kazan,2026-01-03 09:15:00
-104,oleg@example.com,Moscow,2026-01-04 16:45:00
-105,maria@example.com,Novosibirsk,2026-01-05 12:10:00
-106,petr@example.com,Perm,2026-01-06 08:20:00
+9001,anna.hw@example.com,Moscow,2026-01-01 10:00:00
+9002,boris.hw@example.com,SPb,2026-01-02 11:00:00
+9003,maria.hw@example.com,Kazan,2026-01-10 09:00:00
+9004,ivan.hw@example.com,Perm,2026-01-03 12:00:00
+9005,late.hw@example.com,Moscow,2026-02-01 08:00:00
+9006,single.category.hw@example.com,Kazan,2026-01-04 08:00:00
