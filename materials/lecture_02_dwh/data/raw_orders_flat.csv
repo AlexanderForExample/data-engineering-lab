@@ -1,0 +1,21 @@
+raw_order_item_id,source_order_id,source_order_item_id,order_created_at,order_updated_at,order_status,user_external_id,user_name,user_email,user_city,user_registered_at,product_sku,product_name,product_category,product_brand,item_quantity,item_price,item_discount,payment_method,delivery_type
+1,1001,1,2026-05-20 10:15:00,2026-05-20 10:20:00,paid,U001,Анна Иванова,anna@example.com,Москва,2026-01-10,SKU-001,USB-C кабель,Аксессуары,BaseTech,2,790.0,0.0,card,courier
+2,1001,2,2026-05-20 10:15:00,2026-05-20 10:20:00,paid,U001,Анна Иванова,anna@example.com,Москва,2026-01-10,SKU-002,Ноутбук 14 Pro,Ноутбуки,Northstar,1,89990.0,5000.0,card,courier
+3,1002,1,2026-05-20 12:30:00,2026-05-20 12:35:00,paid,U002,Илья Петров,ilya@example.com,Санкт-Петербург,2026-02-01,SKU-003,Беспроводная мышь,Периферия,ClickPro,1,2190.0,0.0,sbp,pickup
+4,1002,2,2026-05-20 12:30:00,2026-05-20 12:35:00,paid,U002,Илья Петров,ilya@example.com,Санкт-Петербург,2026-02-01,SKU-004,Клавиатура TKL,Периферия,ClickPro,1,4990.0,500.0,sbp,pickup
+5,1003,1,2026-05-20 15:10:00,2026-05-20 15:50:00,cancelled,U003,Мария Смирнова,maria@example.com,Казань,2026-02-11,SKU-005,Наушники AirSound,Аудио,SoundBee,1,7990.0,0.0,card,courier
+6,1004,1,2026-05-21 09:05:00,2026-05-21 09:07:00,paid,U004,Олег Соколов,oleg@example.com,Екатеринбург,2026-03-02,SKU-001,USB-C кабель,Аксессуары,BaseTech,3,790.0,0.0,card,pickup
+7,1004,2,2026-05-21 09:05:00,2026-05-21 09:07:00,paid,U004,Олег Соколов,oleg@example.com,Екатеринбург,2026-03-02,SKU-006,PowerBank 20000,Аксессуары,BaseTech,1,3990.0,300.0,card,pickup
+8,1005,1,2026-05-21 11:40:00,2026-05-21 11:45:00,paid,U001,Анна Иванова,anna@example.com,Москва,2026-01-10,SKU-007,Монитор 27 IPS,Мониторы,ViewMax,1,24990.0,1500.0,card,courier
+9,1006,1,2026-05-21 16:05:00,2026-05-22 08:00:00,shipped,U005,Елена Ким,elena@example.com,Новосибирск,2026-03-15,SKU-008,SSD 1TB,Комплектующие,FastDisk,1,8990.0,1000.0,sbp,courier
+10,1006,2,2026-05-21 16:05:00,2026-05-22 08:00:00,shipped,U005,Елена Ким,elena@example.com,Новосибирск,2026-03-15,SKU-009,RAM 32GB,Комплектующие,MemPro,2,6990.0,0.0,sbp,courier
+11,1007,1,2026-05-22 08:55:00,2026-05-22 08:55:00,created,U006,Павел Орлов,pavel@example.com,Москва,2026-04-01,SKU-010,Веб-камера HD,Периферия,CamFox,1,3490.0,0.0,card,pickup
+12,1008,1,2026-05-22 10:20:00,2026-05-22 10:31:00,paid,U003,Мария Смирнова,maria@example.com,Казань,2026-02-11,SKU-005,Наушники AirSound,Аудио,SoundBee,1,7990.0,500.0,card,courier
+13,1008,2,2026-05-22 10:20:00,2026-05-22 10:31:00,paid,U003,Мария Смирнова,maria@example.com,Казань,2026-02-11,SKU-011,Чехол для наушников,Аксессуары,SoundBee,1,1290.0,0.0,card,courier
+14,1009,1,2026-05-22 13:15:00,2026-05-23 09:00:00,refunded,U007,Дмитрий Волков,dmitry@example.com,Самара,2026-04-05,SKU-012,Планшет Mini,Планшеты,Northstar,1,32990.0,2000.0,card,courier
+15,1010,1,2026-05-23 09:30:00,2026-05-23 09:35:00,paid,U008,Софья Морозова,sofia@example.com,Краснодар,2026-04-20,SKU-003,Беспроводная мышь,Периферия,ClickPro,2,2190.0,0.0,sbp,pickup
+16,1010,2,2026-05-23 09:30:00,2026-05-23 09:35:00,paid,U008,Софья Морозова,sofia@example.com,Краснодар,2026-04-20,SKU-004,Клавиатура TKL,Периферия,ClickPro,1,4990.0,0.0,sbp,pickup
+17,1011,1,2026-05-23 18:00:00,2026-05-24 08:30:00,shipped,U002,Илья Петров,ilya@example.com,Санкт-Петербург,2026-02-01,SKU-013,Игровая гарнитура,Аудио,SoundBee,1,5990.0,700.0,card,courier
+18,1011,2,2026-05-23 18:00:00,2026-05-24 08:30:00,shipped,U002,Илья Петров,ilya@example.com,Санкт-Петербург,2026-02-01,SKU-014,Коврик XL,Аксессуары,ClickPro,1,1990.0,0.0,card,courier
+19,1012,1,2026-05-24 14:25:00,2026-05-24 14:28:00,paid,U009,Никита Егоров,nikita@example.com,Ростов-на-Дону,2026-05-01,SKU-015,Роутер AX3000,Сеть,NetBox,1,6990.0,0.0,card,pickup
+20,1012,2,2026-05-24 14:25:00,2026-05-24 14:28:00,paid,U009,Никита Егоров,nikita@example.com,Ростов-на-Дону,2026-05-01,SKU-016,Ethernet кабель 3м,Сеть,BaseTech,2,490.0,0.0,card,pickup
