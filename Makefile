@@ -40,7 +40,7 @@ jupyterhub:
 	docker compose up -d --build postgres-dwh mysql-source minio jupyterhub
 	@until docker compose exec jupyterhub python /srv/jupyterhub/check_db_connections.py >/dev/null 2>&1; do sleep 1; done
 	@test "$$(docker compose ps --status running --services jupyterhub)" = "jupyterhub"
-	@printf "JupyterHub is available at http://localhost:8000 (login: student, password: student)\n"
+	@printf "JupyterHub is available at http://localhost:8000\n"
 
 jupyterhub-check:
 	docker compose exec jupyterhub python /srv/jupyterhub/check_db_connections.py

@@ -1,0 +1,41 @@
+[
+  {
+    "shipment_id": "shp_10001",
+    "order_id": 10001,
+    "provider": "DHL",
+    "events": [
+      {
+        "status": "created",
+        "event_time": "2026-05-01T11:00:00Z",
+        "city": "Phoenix"
+      },
+      {
+        "status": "in_transit",
+        "event_time": "2026-05-02T09:30:00Z",
+        "city": "Denver"
+      },
+      {
+        "status": "delivered",
+        "event_time": "2026-05-04T15:45:00Z",
+        "city": "Chicago"
+      }
+    ]
+  },
+  {
+    "shipment_id": "shp_10002",
+    "order_id": 10002,
+    "provider": "FedEx",
+    "events": [
+      {
+        "status": "created",
+        "event_time": "2026-05-02T13:00:00Z",
+        "city": "Austin"
+      },
+      {
+        "status": "in_transit",
+        "event_time": "2026-05-03T07:30:00Z",
+        "city": "Dallas"
+      }
+    ]
+  }
+]

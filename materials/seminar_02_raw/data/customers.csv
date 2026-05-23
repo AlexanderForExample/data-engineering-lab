@@ -1,0 +1,4 @@
+user_id,email,country,segment,status
+1,alice@example.com,US,Premium,ACTIVE
+2,bob@example.com,US,New,active
+3,carlos@example.com,MX,Regular,ACTIVE

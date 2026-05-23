@@ -156,6 +156,7 @@ services:
       - "8888:8888"
     volumes:
       - ./materials:/materials
+      - ./materials/seminar_02_raw/data:/home/student/seminar_02_raw/data:ro
 
   jupyterhub:
     build:
@@ -183,10 +184,12 @@ services:
       S3_ACCESS_KEY: admin
       S3_SECRET_KEY: password123
       S3_BUCKET: datalake
+      SEMINAR_02_RAW_DATA_DIR: /home/student/seminar_02_raw/data
     ports:
       - "8000:8000"
     volumes:
       - ./materials:/materials
+      - ./materials/seminar_02_raw/data:/home/student/seminar_02_raw/data:ro
 
   airflow-init:
     build:

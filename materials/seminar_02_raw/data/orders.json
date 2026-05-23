@@ -1,0 +1,121 @@
+[
+  {
+    "order_id": 10001,
+    "cart_id": 1,
+    "customer": {
+      "user_id": 1,
+      "city": "Chicago"
+    },
+    "status": "CONFIRMED",
+    "created_at": "2026-05-01T10:15:00Z",
+    "channel": {
+      "name": "mobile_app",
+      "utm": {
+        "source": "push",
+        "campaign": "spring_sale"
+      }
+    },
+    "payment": {
+      "payment_id": "pay_10001",
+      "status": "PAID",
+      "amount": "352.38",
+      "currency": "USD",
+      "attempts": [
+        {
+          "provider": "stripe",
+          "status": "failed",
+          "attempted_at": "2026-05-01T10:15:45Z",
+          "error": {
+            "code": "insufficient_funds"
+          }
+        },
+        {
+          "provider": "stripe",
+          "status": "success",
+          "attempted_at": "2026-05-01T10:16:12Z",
+          "error": null
+        }
+      ]
+    },
+    "items": [
+      {
+        "line_no": 1,
+        "product_id": 1,
+        "sku": "ESS-001",
+        "quantity": "2",
+        "unit_price": "129.99",
+        "category_path": [
+          "beauty",
+          "makeup"
+        ],
+        "adjustments": [
+          {
+            "type": "discount",
+            "amount": "-10.00",
+            "reason": "campaign"
+          },
+          {
+            "type": "tax",
+            "amount": "12.00",
+            "reason": "sales_tax"
+          }
+        ]
+      },
+      {
+        "line_no": 2,
+        "product_id": 2,
+        "sku": "EYE-002",
+        "quantity": "1",
+        "unit_price": "99.90",
+        "category_path": [
+          "beauty",
+          "makeup"
+        ],
+        "adjustments": []
+      }
+    ]
+  },
+  {
+    "order_id": 10002,
+    "cart_id": 2,
+    "customer": {
+      "user_id": 2,
+      "city": "Houston"
+    },
+    "status": "confirmed",
+    "created_at": "2026-05-02T12:00:00Z",
+    "channel": {
+      "name": "web",
+      "utm": {
+        "source": "google",
+        "campaign": "brand_search"
+      }
+    },
+    "payment": {
+      "payment_id": "pay_10002",
+      "status": "paid",
+      "amount": "79.50",
+      "currency": "USD",
+      "attempts": [
+        {
+          "provider": "paypal",
+          "status": "success",
+          "attempted_at": "2026-05-02T12:02:00Z"
+        }
+      ]
+    },
+    "items": [
+      {
+        "line_no": 1,
+        "product_id": 3,
+        "sku": "POW-003",
+        "quantity": "1",
+        "unit_price": "79.50",
+        "category_path": [
+          "fragrances"
+        ],
+        "adjustments": []
+      }
+    ]
+  }
+]
