@@ -1,0 +1,14 @@
+{
+  "order_id": 10001,
+  "customer": {
+    "user_id": 1,
+    "email": "alice@example.com"
+  },
+  "items": [
+    {
+      "sku": "ESS-001",
+      "quantity": 2,
+      "price": "129.99"
+    }
+  ]
+}
