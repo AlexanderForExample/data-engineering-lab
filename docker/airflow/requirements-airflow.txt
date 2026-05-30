@@ -2,4 +2,3 @@ pandas
 psycopg2-binary
 boto3
 pyspark
-mysql-connector-python

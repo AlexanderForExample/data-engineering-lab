@@ -1,13 +1,7 @@
-.PHONY: help test lint up down postgres psql logs-postgres mysql mysql-cli logs-mysql jupyterhub jupyterhub-check logs-jupyterhub lecture-01-data lecture-01-init seminar-01-data seminar-01-init seminar-01-solutions seminar-02-solutions
+.PHONY: help up down postgres psql hive hive-check jupyter seminar logs
 
 help:
-	@printf "Available targets: test, lint, up, down, postgres, psql, logs-postgres, mysql, mysql-cli, logs-mysql, jupyterhub, jupyterhub-check, logs-jupyterhub, lecture-01-data, lecture-01-init, seminar-01-data, seminar-01-init, seminar-01-solutions, seminar-02-solutions\n"
-
-test:
-	pytest
-
-lint:
-	python -m compileall src dags tests
+	@printf "Targets: up, down, postgres, psql, hive, hive-check, jupyter, seminar, logs\n"
 
 up:
 	docker compose up -d
@@ -23,43 +17,26 @@ postgres:
 psql:
 	docker compose exec postgres-dwh psql -U admin -d dwh
 
-logs-postgres:
-	docker compose logs -f postgres-dwh
+hive:
+	docker compose up -d namenode datanode hive-metastore-postgresql hive-metastore hive-server
+	@until docker compose exec namenode hdfs dfs -ls / >/dev/null 2>&1; do sleep 2; done
+	docker compose exec namenode hdfs dfs -mkdir -p /tmp /user/spark /user/hive/warehouse
+	docker compose exec namenode hdfs dfs -chown -R spark:supergroup /user/spark
+	docker compose exec namenode hdfs dfs -chmod 777 /tmp /user/spark /user/hive/warehouse
+	docker compose exec namenode hdfs dfs -chmod -R 777 /user/hive/warehouse
+	@printf "HDFS UI: http://localhost:9870\n"
+	@printf "HiveServer2: jdbc:hive2://localhost:10000\n"
 
-mysql:
-	docker compose up -d mysql-source
-	@until docker compose exec mysql-source mysqladmin ping -h 127.0.0.1 -u source_user -psource_password --silent >/dev/null 2>&1; do sleep 1; done
+hive-check:
+	docker compose exec hive-server beeline -u jdbc:hive2://localhost:10000 -e "CREATE DATABASE IF NOT EXISTS lab_check; SHOW DATABASES;"
 
-mysql-cli:
-	docker compose exec mysql-source mysql -u source_user -psource_password source_db
+jupyter:
+	docker compose up -d --build jupyter
+	@test "$$(docker compose ps --status running --services jupyter)" = "jupyter"
+	@printf "JupyterLab: http://localhost:8888\n"
+	@printf "Spark UI: http://localhost:4040 while SparkSession is running\n"
 
-logs-mysql:
-	docker compose logs -f mysql-source
+seminar: jupyter
 
-jupyterhub:
-	docker compose up -d --build postgres-dwh mysql-source minio jupyterhub
-	@until docker compose exec jupyterhub python /srv/jupyterhub/check_db_connections.py >/dev/null 2>&1; do sleep 1; done
-	@test "$$(docker compose ps --status running --services jupyterhub)" = "jupyterhub"
-	@printf "JupyterHub is available at http://localhost:8000\n"
-
-jupyterhub-check:
-	docker compose exec jupyterhub python /srv/jupyterhub/check_db_connections.py
-
-logs-jupyterhub:
-	docker compose logs -f jupyterhub
-
-lecture-01-data:
-	docker compose exec postgres-dwh ls -la /data/lecture_01
-
-lecture-01-init:
-	docker compose exec postgres-dwh psql -U admin -d dwh -f /docker-entrypoint-initdb.d/01_lecture_01.sql
-
-seminar-01-data: lecture-01-data
-
-seminar-01-init: lecture-01-init
-
-seminar-01-solutions:
-	docker compose exec -T postgres-dwh psql -U admin -d dwh < materials/seminar_01_sql/solutions.sql
-
-seminar-02-solutions:
-	docker compose exec -T mysql-source mysql -u source_user -psource_password source_db < materials/seminar_02_mysql_source/solutions.sql
+logs:
+	docker compose logs -f jupyter spark-master spark-worker namenode datanode hive-metastore hive-server

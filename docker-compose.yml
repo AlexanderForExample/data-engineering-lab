@@ -35,25 +35,6 @@ services:
       timeout: 5s
       retries: 5
 
-  mysql-source:
-    image: mysql:8.4
-    container_name: mysql-source
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: source_db
-      MYSQL_USER: source_user
-      MYSQL_PASSWORD: source_password
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_source_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u source_user -psource_password --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: minio
@@ -85,6 +66,76 @@ services:
       mc anonymous set download local/datalake
       "
 
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      CLUSTER_NAME: data-engineering-lab
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+    ports:
+      - "8020:8020"
+      - "9870:9870"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    depends_on:
+      - namenode
+    environment:
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+      HDFS_CONF_dfs_datanode_data_dir: file:///hadoop/dfs/data
+      SERVICE_PRECONDITION: namenode:9870
+    ports:
+      - "9864:9864"
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+
+  hive-metastore-postgresql:
+    image: bde2020/hive-metastore-postgresql:2.3.0
+    container_name: hive-metastore-postgresql
+    ports:
+      - "15432:5432"
+    volumes:
+      - hive_metastore_postgres_data:/var/lib/postgresql/data
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    depends_on:
+      - namenode
+      - datanode
+      - hive-metastore-postgresql
+    command: bash /opt/hive/bin/metastore-entrypoint.sh
+    environment:
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-postgresql/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      SERVICE_PRECONDITION: namenode:9870 datanode:9864 hive-metastore-postgresql:5432
+    ports:
+      - "9083:9083"
+    volumes:
+      - ./docker/hive/metastore-entrypoint.sh:/opt/hive/bin/metastore-entrypoint.sh:ro
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    depends_on:
+      - hive-metastore
+    environment:
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-postgresql/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      SERVICE_PRECONDITION: hive-metastore:9083
+    ports:
+      - "10000:10000"
+
   spark-master:
     build:
       context: ./docker/spark
@@ -94,11 +145,15 @@ services:
       SPARK_MASTER_HOST: spark-master
       SPARK_MASTER_PORT: 7077
       SPARK_MASTER_WEBUI_PORT: 8080
+      HADOOP_USER_NAME: spark
+      PYSPARK_PYTHON: /opt/bitnami/python/bin/python
+      PYSPARK_DRIVER_PYTHON: /opt/bitnami/python/bin/python
     ports:
       - "7077:7077"
       - "8080:8080"
     volumes:
       - ./:/app
+      - ./materials:/materials
 
   spark-worker:
     build:
@@ -111,10 +166,14 @@ services:
       SPARK_MASTER_URL: spark://spark-master:7077
       SPARK_WORKER_MEMORY: 2G
       SPARK_WORKER_CORES: 2
+      HADOOP_USER_NAME: spark
+      PYSPARK_PYTHON: /opt/bitnami/python/bin/python
+      PYSPARK_DRIVER_PYTHON: /opt/bitnami/python/bin/python
     ports:
       - "8081:8081"
     volumes:
       - ./:/app
+      - ./materials:/materials
 
   jupyter:
     build:
@@ -124,28 +183,38 @@ services:
       - spark-master
       - spark-worker
       - postgres-dwh
-      - mysql-source
       - minio
+      - namenode
+      - datanode
+      - hive-metastore
+      - hive-server
     environment:
       SPARK_MASTER_URL: spark://spark-master:7077
+      HADOOP_CONF_DIR: /opt/bitnami/spark/conf
+      HADOOP_USER_NAME: spark
+      SPARK_CONF_DIR: /opt/bitnami/spark/conf
+      HOME: /tmp
+      SPARK_SUBMIT_OPTS: -Duser.home=/tmp
+      PYSPARK_PYTHON: /opt/bitnami/python/bin/python
+      PYSPARK_DRIVER_PYTHON: /opt/bitnami/python/bin/python
       POSTGRES_HOST: postgres-dwh
       POSTGRES_PORT: 5432
       POSTGRES_DB: dwh
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      MYSQL_HOST: mysql-source
-      MYSQL_PORT: 3306
-      MYSQL_DB: source_db
-      MYSQL_USER: source_user
-      MYSQL_PASSWORD: source_password
       S3_ENDPOINT_URL: http://minio:9000
       S3_ACCESS_KEY: admin
       S3_SECRET_KEY: password123
       S3_BUCKET: datalake
-      PYTHONPATH: /materials
+      HDFS_NAMENODE_URL: hdfs://namenode:8020
+      HDFS_WEBHDFS_URL: http://namenode:9870
+      HIVE_METASTORE_URI: thrift://hive-metastore:9083
+      HIVE_SERVER_HOST: hive-server
+      HIVE_SERVER_PORT: 10000
+      HIVE_SERVER_URL: jdbc:hive2://hive-server:10000/default
+      PYTHONPATH: /materials:/opt/bitnami/spark/python:/opt/bitnami/spark/python/lib/py4j-0.10.9.7-src.zip
     command: >
-      bash -lc "/opt/bitnami/python/bin/python -m pip install --no-cache-dir boto3 jupyter jupyterlab psycopg2-binary mysql-connector-python 'pyspark==3.5.*' &&
-      /opt/bitnami/python/bin/jupyter lab
+      bash -lc "/opt/bitnami/python/bin/jupyter lab
       --ip=0.0.0.0
       --port=8888
       --no-browser
@@ -154,39 +223,7 @@ services:
       --notebook-dir=/materials"
     ports:
       - "8888:8888"
-    volumes:
-      - ./materials:/materials
-      - ./materials/seminar_02_raw/data:/home/student/seminar_02_raw/data:ro
-
-  jupyterhub:
-    build:
-      context: ./docker/jupyterhub
-    container_name: jupyterhub
-    depends_on:
-      postgres-dwh:
-        condition: service_healthy
-      mysql-source:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    environment:
-      POSTGRES_HOST: postgres-dwh
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: dwh
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      MYSQL_HOST: mysql-source
-      MYSQL_PORT: 3306
-      MYSQL_DB: source_db
-      MYSQL_USER: source_user
-      MYSQL_PASSWORD: source_password
-      S3_ENDPOINT_URL: http://minio:9000
-      S3_ACCESS_KEY: admin
-      S3_SECRET_KEY: password123
-      S3_BUCKET: datalake
-      SEMINAR_02_RAW_DATA_DIR: /home/student/seminar_02_raw/data
-    ports:
-      - "8000:8000"
+      - "4040:4040"
     volumes:
       - ./materials:/materials
       - ./materials/seminar_02_raw/data:/home/student/seminar_02_raw/data:ro
@@ -222,8 +259,6 @@ services:
         condition: service_completed_successfully
       postgres-dwh:
         condition: service_healthy
-      mysql-source:
-        condition: service_healthy
       minio:
         condition: service_healthy
       spark-master:
@@ -238,11 +273,6 @@ services:
       POSTGRES_DB: dwh
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      MYSQL_HOST: mysql-source
-      MYSQL_PORT: 3306
-      MYSQL_DB: source_db
-      MYSQL_USER: source_user
-      MYSQL_PASSWORD: source_password
       S3_ENDPOINT_URL: http://minio:9000
       S3_ACCESS_KEY: admin
       S3_SECRET_KEY: password123
@@ -265,8 +295,6 @@ services:
         condition: service_completed_successfully
       postgres-dwh:
         condition: service_healthy
-      mysql-source:
-        condition: service_healthy
       minio:
         condition: service_healthy
       spark-master:
@@ -281,11 +309,6 @@ services:
       POSTGRES_DB: dwh
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      MYSQL_HOST: mysql-source
-      MYSQL_PORT: 3306
-      MYSQL_DB: source_db
-      MYSQL_USER: source_user
-      MYSQL_PASSWORD: source_password
       S3_ENDPOINT_URL: http://minio:9000
       S3_ACCESS_KEY: admin
       S3_SECRET_KEY: password123
@@ -300,5 +323,7 @@ services:
 volumes:
   postgres_dwh_data:
   postgres_airflow_data:
-  mysql_source_data:
   minio_data:
+  hadoop_namenode:
+  hadoop_datanode:
+  hive_metastore_postgres_data:
