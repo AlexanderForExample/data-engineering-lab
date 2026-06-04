@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "dfs" ]]; then
+  shift
+fi
+
+exec /opt/bitnami/spark/bin/spark-class org.apache.hadoop.fs.FsShell "$@"

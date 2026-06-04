@@ -18,12 +18,12 @@ psql:
 	docker compose exec postgres-dwh psql -U admin -d dwh
 
 hive:
-	docker compose up -d namenode datanode hive-metastore-postgresql hive-metastore hive-server
-	@until docker compose exec namenode hdfs dfs -ls / >/dev/null 2>&1; do sleep 2; done
-	docker compose exec namenode hdfs dfs -mkdir -p /tmp /user/spark /user/hive/warehouse
-	docker compose exec namenode hdfs dfs -chown -R spark:supergroup /user/spark
-	docker compose exec namenode hdfs dfs -chmod 777 /tmp /user/spark /user/hive/warehouse
-	docker compose exec namenode hdfs dfs -chmod -R 777 /user/hive/warehouse
+	docker compose up -d namenode datanode hdfs-init hive-metastore-postgresql hive-metastore hive-server
+	@until docker compose exec namenode /opt/hadoop-3.2.1/bin/hdfs dfs -ls / >/dev/null 2>&1; do sleep 2; done
+	docker compose exec namenode /opt/hadoop-3.2.1/bin/hdfs dfs -mkdir -p /tmp /user/spark /warehouse
+	docker compose exec namenode /opt/hadoop-3.2.1/bin/hdfs dfs -chown -R spark:supergroup /user/spark /warehouse
+	docker compose exec namenode /opt/hadoop-3.2.1/bin/hdfs dfs -chmod 777 /tmp /user/spark
+	docker compose exec namenode /opt/hadoop-3.2.1/bin/hdfs dfs -chmod 1777 /warehouse
 	@printf "HDFS UI: http://localhost:9870\n"
 	@printf "HiveServer2: jdbc:hive2://localhost:10000\n"
 
@@ -32,6 +32,7 @@ hive-check:
 
 jupyter:
 	docker compose up -d --build jupyter
+	docker compose exec -u root jupyter chmod 777 /spark-local
 	@test "$$(docker compose ps --status running --services jupyter)" = "jupyter"
 	@printf "JupyterLab: http://localhost:8888\n"
 	@printf "Spark UI: http://localhost:4040 while SparkSession is running\n"

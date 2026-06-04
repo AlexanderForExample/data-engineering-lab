@@ -29,8 +29,11 @@ RUN chmod +x /usr/local/bin/hdfs && \
     ln -sf /opt/bitnami/python/bin/python /usr/local/bin/python && \
     ln -sf /opt/bitnami/python/bin/python3 /usr/local/bin/python3
 
-RUN if ! getent passwd 1001 >/dev/null; then \
-      printf 'spark:x:1001:0:Spark User:/tmp:/bin/bash\n' >> /etc/passwd; \
+RUN if ! getent group supergroup >/dev/null; then \
+      printf 'supergroup:x:1001:\n' >> /etc/group; \
+    fi && \
+    if ! getent passwd 1001 >/dev/null; then \
+      printf 'spark:x:1001:1001:Spark User:/tmp:/bin/bash\n' >> /etc/passwd; \
     fi
 
 USER 1001
